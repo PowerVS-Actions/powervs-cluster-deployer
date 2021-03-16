@@ -2,8 +2,11 @@ FROM python:3.9
 
 LABEL maintaner="Rafael Peria de Sene - rpsene@br.ibm.com "
 
-RUN apt-get update && apt-get install -y python3-pip && \
+RUN apt-get update && \
+apt-get install -y python3-pip && \
 pip3 install python-jenkins
+
+WORKDIR /cluster
 
 ENV JENKINS_URL=""
 ENV JENKINS_USER=""
@@ -27,8 +30,10 @@ ENV RHEL_SUBS_PASSWORD=""
 # CLUSTER_ID is used to delete a given cluster.
 ENV CLUSTER_ID=""
 
-COPY ./powervs.py /
+ADD ./powervs.py ./
 
 CMD ["powervs.py"]
+
+RUN ls -la && pwd
 
 ENTRYPOINT ["/usr/local/bin/python3.9"]

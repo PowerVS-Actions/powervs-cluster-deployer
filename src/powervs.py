@@ -34,7 +34,7 @@ def run_jenkins(URL, JENKINS_USER, TOKEN, JOB_NAME, PARAMETERS):
 
     # get the next build number, which will be the one we want to monitor
     NEXT_BUILD_NUMBER = SERVER.get_job_info(JOB_NAME)['nextBuildNumber']
-    print ("Cluster Build Started...")
+    print ("Job Started...")
     JOB=SERVER.build_job(JOB_NAME,PARAMETERS,TOKEN)
 
     # give Jenkins sometime to process the request and queue the JOB
@@ -61,7 +61,7 @@ def run_jenkins(URL, JENKINS_USER, TOKEN, JOB_NAME, PARAMETERS):
                 FILE_NAME=str(atf['fileName'])
                 print (URL + str(NEXT_BUILD_NUMBER) + "/artifact/" + FILE_NAME)
                 FULL_URL=(URL + str(NEXT_BUILD_NUMBER) + "/artifact/" + FILE_NAME)
-                CMD="curl -sS -u " + JENKINS_USER + ":" + TOKEN + " " + str(FULL_URL) + " --output " + FILE_NAME
+                CMD="cd /tmp && curl -sS -OL --progress-bar -u " + JENKINS_USER + ":" + TOKEN + " " + str(FULL_URL)
                 execute (CMD)
         elif RESULT == 'FAILURE':
             print (SERVER.get_build_console_output(JOB_NAME, NEXT_BUILD_NUMBER))
