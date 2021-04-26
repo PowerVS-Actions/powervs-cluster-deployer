@@ -1,0 +1,40 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: ocp-cluster-on-powervs
+labels:
+  app: ocp-cluster-on-powervs
+spec:
+  restartPolicy: Never
+  containers:
+    - name: ocp-cluster-on-powervs
+      image: qquay.io/powercloud/powervs-ocp-jenkins-deployment:latest
+      imagePullPolicy: Always
+      env:
+        - name: ACTION
+          value: ""
+        - name: REQUESTOR_EMAIL
+          value: ""
+        - name: OPENSHIFT_VERSION
+          value: ""
+        - name: OPENSHIFT_CLUSTER_FLAVOR
+          value: ""
+        - name: HTTP_PROXY
+          value: ""
+        - name: HTTPS_PROXY
+          value: ""
+        - name: POWERVS_JENKINS_URL
+          valueFrom:
+            secretKeyRef:
+              name: ocp-terraform-secret-jenkins-url
+              key: powervs-jenkins-url
+        - name: POWERVS_JENKINS_USER
+          valueFrom:
+            secretKeyRef:
+              name: ocp-terraform-secret-jenkins-user
+              key: powervs-jenkins-user
+        - name: POWERVS_JENKINS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ocp-terraform-secret-jenkins-token
+              key: powervs-jenkins-token

@@ -1,0 +1,34 @@
+os: linux
+
+dist: bionic
+language: bash
+services: docker
+
+# safelist
+branches:
+  only:
+  - main
+
+jobs:
+  include:
+    - stage: building ppc64le container image
+      arch: ppc64le
+      script:
+        - cd ./src
+        - docker build -t quay.io/powercloud/powervs-ocp-jenkins-deployment:ppc64le .
+        - docker login quay.io -u $USER_QUAY -p $PWD_QUAY
+        - docker push quay.io/powercloud/powervs-ocp-jenkins-deployment:ppc64le
+    - stage: building x86_64 container image
+      arch: amd64
+      script:
+        - cd ./src
+        - docker build -t quay.io/powercloud/powervs-ocp-jenkins-deployment:x86_64 .
+        - docker login quay.io -u $USER_QUAY -p $PWD_QUAY
+        - docker push quay.io/powercloud/powervs-ocp-jenkins-deployment:x86_64
+    - stage: building multi-arch container image
+      arch: ppc64le
+      script:
+        - export DOCKER_CLI_EXPERIMENTAL=enabled;
+        - docker manifest create quay.io/powercloud/powervs-ocp-jenkins-deployment:latest quay.io/powercloud/powervs-ocp-jenkins-deployment:x86_64 quay.io/powercloud/powervs-ocp-jenkins-deployment:ppc64le
+        - docker login quay.io -u "$USER_QUAY" -p "$PWD_QUAY"
+        - docker manifest push quay.io/powercloud/powervs-ocp-jenkins-deployment:latest

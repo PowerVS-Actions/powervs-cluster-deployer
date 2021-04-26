@@ -1,0 +1,10 @@
+ACTION=destroy
+REQUESTOR_EMAIL=
+
+# The ID of the cluster that will be deleted.
+CLUSTER_ID=
+
+# Jenkins server API access
+JENKINS_URL=
+JENKINS_USER=
+JENKINS_TOKEN=

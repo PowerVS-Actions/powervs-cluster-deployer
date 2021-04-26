@@ -4,7 +4,7 @@ A simple combination of Python, Jenkins and Docker to easily deploy anything in 
 ## Build the container image
 
 ```
-docker built -t pvs-jenkins .
+docker build -t pvs-jenkins .
 ```
 
 ## Set the variables
