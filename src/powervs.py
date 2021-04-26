@@ -57,9 +57,6 @@ def run_jenkins(URL, JENKINS_USER, TOKEN, JOB_NAME, PARAMETERS):
     # connect to the jenkins instance
     SERVER = jenkins.Jenkins(URL, username=JENKINS_USER,
                              password=TOKEN, timeout=60)
-    VERSION = SERVER.get_version()
-
-    print('Hello from Jenkins %s' % (VERSION))
 
     # get the next build number, which will be the one we want to monitor
     NEXT_BUILD_NUMBER = SERVER.get_job_info(JOB_NAME)['nextBuildNumber']

@@ -2,7 +2,7 @@ FROM python:3.9
 
 LABEL maintaner="Rafael Peria de Sene - rpsene@br.ibm.com "
 
-RUN apt-get update && \
+RUN apt-get update && apt-get upgrade -y &&\
 apt-get install -y python3-pip && \
 pip3 install python-jenkins
 
