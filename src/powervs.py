@@ -27,22 +27,21 @@ def jenkins_action():
         'REQUESTOR_EMAIL': os.getenv("REQUESTOR_EMAIL"),
         'OPENSHIFT_VERSION': os.getenv("OPENSHIFT_VERSION"),
         'CLUSTER_ID': os.getenv("CLUSTER_ID"),
-        'OPENSHIFT_CLUSTER_FLAVOR': os.getenv("OPENSHIFT_CLUSTER_FLAVOR"),
-        'OPENSHIFT_PREFIX': os.getenv("OPENSHIFT_PREFIX")
+        'OPENSHIFT_CLUSTER_FLAVOR': os.getenv("OPENSHIFT_CLUSTER_FLAVOR")
     }
 
     if ACTION == "create":
         JENKINS_JOB_NAME = "powervs-clusters/new-cluster-from-rh"
-        run_jenkins(os.getenv("JENKINS_URL"),
-                    os.getenv("JENKINS_USER"),
-                    os.getenv("JENKINS_TOKEN"),
+        run_jenkins(os.getenv("POWERVS_JENKINS_URL"),
+                    os.getenv("POWERVS_JENKINS_USER"),
+                    os.getenv("POWERVS_JENKINS_TOKEN"),
                     JENKINS_JOB_NAME,
                     JENKINS_JOB_PARAMETERS)
     elif ACTION == "destroy":
         JENKINS_JOB_NAME = "powervs-clusters/clear-cluster"
-        run_jenkins(os.getenv("JENKINS_URL"),
-                os.getenv("JENKINS_USER"),
-                os.getenv("JENKINS_TOKEN"),
+        run_jenkins(os.getenv("POWERVS_JENKINS_URL"),
+                os.getenv("POWERVS_JENKINS_USER"),
+                os.getenv("POWERVS_JENKINS_TOKEN"),
                 JENKINS_JOB_NAME,
                 JENKINS_JOB_PARAMETERS,)
     else:
