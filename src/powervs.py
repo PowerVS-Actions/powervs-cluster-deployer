@@ -1,13 +1,22 @@
+# -*- coding: utf-8 -*-
+
+"""
+Copyright (C) 2021 IBM Corporation
+    Contributors:
+        * Rafael Peria de Sene <rpsene@br.ibm.com>
+"""
+
 import os
 import sys
 import time
-import jenkins
-import requests
 import subprocess
+import requests
+import jenkins
 
 
-def check_connectivity(URL):
-    return requests.head(URL).status_code == 200
+def check_connectivity(url):
+    ''' Check if the script can access Jenkins'''
+    return requests.head(url).status_code == 200
 
 
 def execute(command):
@@ -20,83 +29,91 @@ def execute(command):
 
 
 def jenkins_action():
+    ''' Execute the proper Jenkins action'''
 
-    ACTION = os.getenv("ACTION")
-
-    JENKINS_JOB_PARAMETERS = {
+    action = os.getenv("ACTION")
+    jenkins_job_parameters = {
         'REQUESTOR_EMAIL': os.getenv("REQUESTOR_EMAIL"),
         'OPENSHIFT_VERSION': os.getenv("OPENSHIFT_VERSION"),
         'CLUSTER_ID': os.getenv("CLUSTER_ID"),
         'OPENSHIFT_CLUSTER_FLAVOR': os.getenv("OPENSHIFT_CLUSTER_FLAVOR")
     }
 
-    if ACTION == "create":
-        JENKINS_JOB_NAME = "powervs-clusters/new-cluster-from-rh"
-        run_jenkins(os.getenv("POWERVS_JENKINS_URL"),
-                    os.getenv("POWERVS_JENKINS_USER"),
-                    os.getenv("POWERVS_JENKINS_TOKEN"),
-                    JENKINS_JOB_NAME,
-                    JENKINS_JOB_PARAMETERS)
-    elif ACTION == "destroy":
-        JENKINS_JOB_NAME = "powervs-clusters/clear-cluster"
-        run_jenkins(os.getenv("POWERVS_JENKINS_URL"),
-                os.getenv("POWERVS_JENKINS_USER"),
-                os.getenv("POWERVS_JENKINS_TOKEN"),
-                JENKINS_JOB_NAME,
-                JENKINS_JOB_PARAMETERS,)
+    if action == "create":
+        jenkins_job_name = "powervs-clusters/new-cluster-from-rh"
+        run_jenkins(jenkins_job_name, jenkins_job_parameters)
+    elif action == "destroy":
+        jenkins_job_name = "powervs-clusters/clear-cluster"
+        run_jenkins(jenkins_job_name, jenkins_job_parameters)
     else:
-        sys.exit("ERROR: option " + ACTION + " is not supported.")
+        sys.exit("ERROR: option " + action + " is not supported.")
 
 
-def run_jenkins(URL, JENKINS_USER, TOKEN, JOB_NAME, PARAMETERS):
+def run_jenkins(job_name, parameters):
     ''' Run Jenkins job and waits for its completition'''
 
-    if check_connectivity(URL):
-        sys.exit("Could not reach " + URL)
+    jenkins_url = os.getenv("POWERVS_JENKINS_URL")
+    jenkins_user = os.getenv("POWERVS_JENKINS_USER")
+    jenkins_token = os.getenv("POWERVS_JENKINS_TOKEN")
+
+    if check_connectivity(jenkins_url):
+        sys.exit("Could not reach " + jenkins_url)
 
     # connect to the jenkins instance
-    SERVER = jenkins.Jenkins(URL, username=JENKINS_USER,
-                             password=TOKEN, timeout=60)
+    jenkins_server = jenkins.Jenkins(jenkins_url, username=jenkins_user,
+                                     password=jenkins_token, timeout=60)
 
     # get the next build number, which will be the one we want to monitor
-    NEXT_BUILD_NUMBER = SERVER.get_job_info(JOB_NAME)['nextBuildNumber']
+    next_build_number = jenkins_server.get_job_info(job_name)[
+        'nextBuildNumber']
     print("Job Started...")
-    JOB = SERVER.build_job(JOB_NAME, PARAMETERS, TOKEN)
+    jenkins_server.build_job(job_name, parameters, jenkins_url)
 
-    # give Jenkins sometime to process the request and queue the JOB
+    # give Jenkins sometime to process the request and queue the job
     time.sleep(45)
 
     # monitor the build
-    RESULT = "none"
-    COUNTER = 0
-    while RESULT != 'SUCCESS':
+    result = "none"
+    counter = 0
+    while result != 'SUCCESS':
 
-        BUILD_INFO = SERVER.get_build_info(JOB_NAME, NEXT_BUILD_NUMBER)
-        RESULT = BUILD_INFO['result']
-        URL = SERVER.get_job_info(JOB_NAME)['url']
+        build_info = jenkins_server.get_build_info(job_name, next_build_number)
+        result = build_info['result']
+        url = jenkins_server.get_job_info(job_name)['url']
 
-        COUNTER = (COUNTER + 1)
+        counter = (counter + 1)
         print("*", end="", flush=True)
 
         # avoid too many calls
-        time.sleep(30)
+        time.sleep(45)
 
-        if RESULT == 'SUCCESS':
-            print("\nsuccess")
-            for atf in BUILD_INFO['artifacts']:
-                FILE_NAME = str(atf['fileName'])
-                print(URL + str(NEXT_BUILD_NUMBER) + "/artifact/" + FILE_NAME)
-                FULL_URL = (URL + str(NEXT_BUILD_NUMBER) +
-                            "/artifact/" + FILE_NAME)
-                CMD = "cd /tmp && curl -sS -OL --progress-bar -u " + \
-                    JENKINS_USER + ":" + TOKEN + " " + str(FULL_URL)
-                execute(CMD)
-        elif RESULT == 'FAILURE':
-            print(SERVER.get_build_console_output(JOB_NAME, NEXT_BUILD_NUMBER))
+        if result == 'SUCCESS':
+            print("\nSUCCESS: cluster build completed.")
+            for atf in build_info['artifacts']:
+                file_url = str(atf['relativePath'])
+                file_name = str(atf['fileName'])
+                if file_name.endswith('.tar'):
+                    print(url + str(next_build_number) +
+                          "/artifact/" + file_url)
+                    full_url = (url + str(next_build_number) +
+                                "/artifact/" + file_url)
+                    execute("cd /tmp && wget --auth-no-challenge --user=" +
+                            jenkins_user + " --password=" +
+                            jenkins_url + " " + str(full_url))
+                    execute("tar -xvf ./" + file_name + ".tar")
+                    execute("mkdir -p /tmp/output; cp -rp /tmp/" +
+                            file_name + "/* /tmp/output")
+                else:
+                    sys.exit(
+                        "ERROR: could not locate the cluster build artifact.")
+        elif result == 'FAILURE':
+            print(jenkins_server.get_build_console_output(
+                job_name, next_build_number))
             sys.exit("ERROR: build failed.")
 
 
 def main():
+    '''Calls the main execution function.'''
     jenkins_action()
 
 
