@@ -98,11 +98,11 @@ def run_jenkins(job_name, parameters):
                     full_url = (url + str(next_build_number) +
                                 "/artifact/" + file_url)
                     execute("cd /tmp && wget --auth-no-challenge --user=" +
-                            jenkins_user + " --password=" +
-                            jenkins_url + " " + str(full_url))
-                    execute("tar -xvf ./" + file_name + ".tar")
-                    execute("mkdir -p /tmp/output; cp -rp /tmp/" +
-                            file_name + "/* /tmp/output")
+                            jenkins_user + " --password=" + jenkins_token + " " + str(full_url))
+                    execute("mkdir -p /tmp/output; tar -xvf /tmp/" +
+                            file_name + " -C /tmp/output")
+                    execute("mv /tmp/output/" + os.path.splitext(file_name)
+                            [0] + "/*" + " /tmp/output")
                 else:
                     sys.exit(
                         "ERROR: could not locate the cluster build artifact.")
