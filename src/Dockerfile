@@ -4,7 +4,7 @@ LABEL maintaner="Rafael Peria de Sene - rpsene@br.ibm.com "
 
 RUN apt-get update && apt-get upgrade -y && \
 apt-get install -y python3-pip wget && \
-pip3 install python-jenkins pycurl
+pip3 install python-jenkins
 
 WORKDIR /cluster
 
