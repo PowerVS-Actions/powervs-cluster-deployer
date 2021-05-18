@@ -64,7 +64,7 @@ def run_jenkins(job_name, parameters):
     jenkins_user = os.getenv("POWERVS_JENKINS_USER")
     jenkins_token = os.getenv("POWERVS_JENKINS_TOKEN")
 
-    if check_connectivity_ping(jenkins_url):
+    if not check_connectivity_ping(jenkins_url):
         sys.exit("ERROR: could not reach " + jenkins_url)
 
     # connect to the jenkins instance
