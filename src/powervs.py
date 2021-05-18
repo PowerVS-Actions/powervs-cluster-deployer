@@ -14,11 +14,6 @@ import requests
 import jenkins
 
 
-def check_connectivity(url):
-    ''' Check if the script can access Jenkins'''
-    return requests.head(url).status_code == 200
-
-
 def execute(command):
     ''' Execute a command with its parameters and return the exit code '''
     try:
@@ -26,6 +21,18 @@ def execute(command):
                                      shell=True)
     except subprocess.CalledProcessError as excp:
         return excp.returncode
+
+
+def check_connectivity_ping(url):
+    ''' Check if the script can access resources at IBM Cloud'''
+    domain = urlparse(url).netloc
+    ip = (domain.split(":")[0])
+    return execute("ping -c 1 " + ip) == 0
+
+
+def check_connectivity(url):
+    ''' Check if the script can access Jenkins'''
+    return requests.head(url).status_code == 200
 
 
 def jenkins_action():
@@ -52,12 +59,12 @@ def jenkins_action():
 def run_jenkins(job_name, parameters):
     ''' Run Jenkins job and waits for its completition'''
 
+    if check_connectivity_ping(jenkins_url):
+        sys.exit("ERROR: could not reach " + jenkins_url)
+
     jenkins_url = os.getenv("POWERVS_JENKINS_URL")
     jenkins_user = os.getenv("POWERVS_JENKINS_USER")
     jenkins_token = os.getenv("POWERVS_JENKINS_TOKEN")
-
-    if check_connectivity(jenkins_url):
-        sys.exit("Could not reach " + jenkins_url)
 
     # connect to the jenkins instance
     jenkins_server = jenkins.Jenkins(jenkins_url, username=jenkins_user,
@@ -107,6 +114,7 @@ def run_jenkins(job_name, parameters):
                     sys.exit(
                         "ERROR: could not locate the cluster build artifact.")
         elif result == 'FAILURE':
+            print ("CLUSTER BUILD FAILED: " + url)
             print(jenkins_server.get_build_console_output(
                 job_name, next_build_number))
             sys.exit("ERROR: build failed.")
