@@ -59,12 +59,12 @@ def jenkins_action():
 def run_jenkins(job_name, parameters):
     ''' Run Jenkins job and waits for its completition'''
 
-    if check_connectivity_ping(jenkins_url):
-        sys.exit("ERROR: could not reach " + jenkins_url)
-
     jenkins_url = os.getenv("POWERVS_JENKINS_URL")
     jenkins_user = os.getenv("POWERVS_JENKINS_USER")
     jenkins_token = os.getenv("POWERVS_JENKINS_TOKEN")
+
+    if check_connectivity_ping(jenkins_url):
+        sys.exit("ERROR: could not reach " + jenkins_url)
 
     # connect to the jenkins instance
     jenkins_server = jenkins.Jenkins(jenkins_url, username=jenkins_user,
