@@ -12,6 +12,7 @@ import time
 import subprocess
 import requests
 import jenkins
+from urllib.parse import urlparse
 
 
 def execute(command):
