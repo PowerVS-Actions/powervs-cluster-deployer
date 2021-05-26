@@ -1,6 +1,7 @@
 FROM python:3.9
 
-LABEL maintaner="Rafael Peria de Sene - rpsene@br.ibm.com "
+LABEL maintaner="Rafael Peria de Sene - rpsene@br.ibm.com"
+LABEL year="2021"
 
 RUN apt-get update && apt-get upgrade -y && \
 apt-get install -y python3-pip wget && \
