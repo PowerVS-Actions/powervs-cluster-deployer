@@ -58,10 +58,10 @@ def jenkins_action():
     }
 
     if action == "create":
-        jenkins_job_name = os.getenv("OPENSHIFT_JENKINS_JOB_NAME")
+        jenkins_job_name = "ibmcloud-powervs-ocp-actions/ibmcloud-powervs-redhat-cluster-deploy"
         run_jenkins(jenkins_job_name, jenkins_job_parameters)
     elif action == "destroy":
-        jenkins_job_name = os.getenv("OPENSHIFT_JENKINS_JOB_NAME")
+        jenkins_job_name = "ibmcloud-powervs-ocp-actions/ibmcloud-powervs-redhat-cluster-destroy"
         run_jenkins(jenkins_job_name, jenkins_job_parameters)
     else:
         sys.exit("ERROR: option " + action + " is not supported.")
