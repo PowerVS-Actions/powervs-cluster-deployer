@@ -46,10 +46,10 @@ def check_connectivity(url):
     return requests.head(url).status_code == 200
 
 
-def jenkins_action(jenkins_action):
+def jenkins_action(jenkins_action="none"):
     ''' Execute the proper Jenkins action'''
 
-    if jenkins_action:
+    if jenkins_action is not "none":
         action = jenkins_action
     else:
         action = os.getenv("ACTION")
