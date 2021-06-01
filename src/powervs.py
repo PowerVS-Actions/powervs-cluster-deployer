@@ -46,10 +46,14 @@ def check_connectivity(url):
     return requests.head(url).status_code == 200
 
 
-def jenkins_action():
+def jenkins_action(jenkins_action):
     ''' Execute the proper Jenkins action'''
 
-    action = os.getenv("ACTION")
+    if jenkins_action:
+        action = jenkins_action
+    else:
+        action = os.getenv("ACTION")
+
     jenkins_job_parameters = {
         'REQUESTOR_EMAIL': os.getenv("REQUESTOR_EMAIL"),
         'OPENSHIFT_VERSION': os.getenv("OPENSHIFT_VERSION"),
@@ -137,6 +141,7 @@ def run_jenkins(job_name, parameters):
                 print ("CLUSTER BUILD FAILED: " + url)
                 print(jenkins_server.get_build_console_output(
                     job_name, next_build_number))
+                jenkins_action("destroy")
                 sys.exit("ERROR: build failed.")
     else:
         sys.exit("ERROR: Jenkins failed to be respond, cancelling.")
