@@ -4,8 +4,9 @@ LABEL maintaner="Rafael Peria de Sene - rpsene@br.ibm.com"
 LABEL year="2021"
 
 RUN apt-get update && apt-get upgrade -y && \
-apt-get install -y python3-pip wget && \
-pip3 install python-jenkins urllib3
+apt-get install -y python3-pip wget libpq-dev \
+python-dev build-essential && \
+pip3 install python-jenkins urllib3 pytz
 
 WORKDIR /cluster
 
@@ -16,8 +17,6 @@ ENV POWERVS_JENKINS_TOKEN=""
 ENV REQUESTOR_EMAIL=""
 ENV OPENSHIFT_VERSION=""
 ENV OPENSHIFT_CLUSTER_FLAVOR=""
-
-# CLUSTER_ID is used to delete a given cluster.
 ENV CLUSTER_ID=""
 
 ADD ./powervs.py ./
