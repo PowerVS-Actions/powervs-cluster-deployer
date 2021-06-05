@@ -111,6 +111,10 @@ def get_jenkins_server_parameters():
         'POWERVS_JENKINS_USER': os.getenv("POWERVS_JENKINS_USER"),
         'POWERVS_JENKINS_TOKEN': os.getenv("POWERVS_JENKINS_TOKEN")
     }
+
+    if not any([jenkins_server_parameters["POWERVS_JENKINS_URL"], jenkins_server_parameters["POWERVS_JENKINS_USER"], jenkins_server_parameters["POWERVS_JENKINS_TOKEN"]]):
+        sys.exit("ERROR: The credentials to access the Jenkins server were not set.")
+
     return jenkins_server_parameters
 
 
